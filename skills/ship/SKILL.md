@@ -22,7 +22,7 @@ Start every subagent with a fresh context. Brief it with **context pointers** (p
 
 1. **Map.** Read the spec, its journal and its tickets. The **frontier** is every open ticket with no open blocker. Keep the ledger: each ticket's status, each arbiter verdict, each parked question. After a compaction, trust the ledger, git and the tracker over your summary. After a crash, start fresh agents from the ledger and the worktrees, one at a time, rather than resuming the old ones.
 
-2. **Branch.** Create the integration branch from the default branch, or resume it if it exists. Nothing is ever committed on the default branch.
+2. **Branch.** The integration branch starts at the default branch's tip; if it already holds unmerged commits, resume it instead. Nothing is ever committed on the default branch.
 
 3. **Implement.** One background **implementer** per frontier ticket, each in its own worktree. Brief:
    - base the worktree on the integration branch tip;
