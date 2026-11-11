@@ -14,7 +14,7 @@ You are the **orchestrator**. You dispatch subagents, read their short reports, 
 
 The human already said what they want: it is in the spec, the **decision journal**, the ADRs and the tickets. Subagents cannot reach the human; every question they raise comes to you, and you send it to the **arbiter** ([arbiter.md](arbiter.md)). Only its `ESCALATE` verdicts reach the human.
 
-The delivery rules should have been provided to you (`docs/agents/delivery.md`): verify command, sandbox, off-limits data and services, branch and commit rules. If not, write them from [delivery-template.md](delivery-template.md) first.
+The delivery rules should have been provided to you (`docs/agents/delivery.md`): verify command, sandbox, off-limits data and services, commit rules. If not, stop and tell the human to run `/setup-ship`.
 
 Start every subagent with a fresh context. Brief it with **context pointers** (paths, ticket numbers, branches), never restated content.
 

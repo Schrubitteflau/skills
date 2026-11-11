@@ -1,12 +1,3 @@
-# Delivery rules
-
-`docs/agents/delivery.md` holds the human's standing instructions for `/ship`, so they never paste them again.
-
-To write it, fill every section from the environment (`CLAUDE.md`, build scripts, CI, `docs/`). Ask the human, in one round with your best guesses, only what no file tells you: usually the off-limits data and the paid services. Then add a pointer to it in `CLAUDE.md`'s agent-skills section.
-
-Write only what holds for every spec. What belongs to one delivery (its spec, its tickets, its branches, its journal) comes from `/ship <n>`, never from this file.
-
-```markdown
 # Delivery
 
 Read by `/ship` and its subagents.
@@ -41,4 +32,3 @@ Read by `/ship` and its subagents.
 ## Project edge cases
 
 <Failure modes this project has already met.>
-```

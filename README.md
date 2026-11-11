@@ -6,6 +6,7 @@ Skills Claude Code personnels, installables avec [`npx skills`](https://github.c
 | --- | --- |
 | `end-grilling` | Clôt une session de grilling : écrit chaque décision de l'humain, avec ses propres mots, dans le journal de décisions (hors du repo). |
 | `ship` | Livre les tickets d'une spec sur une branche d'intégration : chaque ticket implémenté, revu jusqu'à être propre, puis mergé. |
+| `setup-ship` | Prépare un dépôt pour les deux autres, ou vérifie qu'il l'est encore : règles de livraison à jour et vraies, arbre sans spec, journal ni skill committé. |
 
 ## Pourquoi ces deux skills
 
@@ -43,7 +44,7 @@ flowchart TD
     RV --> RP["Rapport : à vérifier dans l'app, décidé sans toi, non résolu"]
 ```
 
-`/grill-with-docs`, `/to-spec`, `/to-tickets`, `/tdd` et `/code-review` sont les skills de Matt Pocock ; `/end-grilling` et `/ship` sont ceux de ce dépôt.
+`/grill-with-docs`, `/to-spec`, `/to-tickets`, `/tdd` et `/code-review` sont les skills de Matt Pocock ; `/end-grilling` et `/ship` sont ceux de ce dépôt. `/setup-ship` n'est pas dans le flux : il prépare le dépôt, une fois.
 
 ## Comment ils marchent
 
@@ -73,12 +74,28 @@ L'orchestrateur ne code pas et ne lit aucun diff : il distribue le travail et ro
 
 Rien n'est jamais committé sur la branche principale. À la fin, un seul message : les questions restées ouvertes, ce qu'il faut regarder de tes yeux, ce qui a été décidé sans toi, ce qui n'est pas résolu.
 
-Fichiers du skill : `SKILL.md` (l'orchestrateur), `arbiter.md`, `reviewers.md`, `delivery-template.md`.
+Fichiers du skill : `SKILL.md` (l'orchestrateur), `arbiter.md`, `reviewers.md`.
+
+### `setup-ship`
+
+À lancer une fois par dépôt avant le premier `/ship`, puis après une mise à jour des skills ou un changement d'outillage du projet. Il suit la démarche de `/setup-matt-pocock-skills` : explorer, contrôler, montrer, confirmer, écrire.
+
+| Contrôle | Ce qu'il attrape |
+| --- | --- |
+| Forme | Une section du gabarit qui manque, un reste d'un ancien gabarit (chemin de journal, nommage de branches, emplacement des specs) |
+| Durable | Une ligne propre à une seule livraison : un numéro de spec, un nom de branche |
+| Vrai | Un chemin qui n'existe plus, une commande absente des scripts du projet et de la machine, un fichier cité qui a disparu |
+| Arbre propre | Une spec, un journal ou un skill tiers committé |
+| Pointeur | L'entrée « Delivery » manquante dans `CLAUDE.md` ou `AGENTS.md` |
+
+Il commence par vérifier que ta copie locale est à jour avec le dépôt distant, pour ne pas corriger un fichier déjà corrigé ailleurs. Il contrôle qu'une commande existe, sans la lancer : une vérification complète peut prendre plusieurs minutes. Il montre ses constats et ses corrections, puis n'écrit qu'après ton accord, et ne committe rien.
+
+C'est lui qui écrit `docs/agents/delivery.md` dans un dépôt neuf, à partir de `delivery-template.md`. Si ce fichier manque, `/ship` s'arrête et te renvoie ici.
 
 ## Ce qu'ils attendent d'un projet
 
 - **Une spec publiée en issue**, et ses tickets en sous-issues (`/to-spec`, `/to-tickets`).
-- **`docs/agents/delivery.md`** : les règles de livraison du projet (commande de vérification, bac à sable, données et services interdits, style des commits). `ship` l'écrit au premier lancement à partir de `delivery-template.md`. Ce fichier ne nomme ni spec, ni ticket, ni branche : il vaut pour toutes les livraisons et ne se réécrit pas d'une spec à l'autre.
+- **`docs/agents/delivery.md`** : les règles de livraison du projet (commande de vérification, bac à sable, données et services interdits, style des commits). `/setup-ship` l'écrit et le tient à jour. Ce fichier ne nomme ni spec, ni ticket, ni branche : il vaut pour toutes les livraisons et ne se réécrit pas d'une spec à l'autre.
 - **Les skills `tdd`, `code-review` et `to-spec`** installés.
 
 ## Où vivent les choses
