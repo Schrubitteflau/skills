@@ -4,6 +4,8 @@
 
 To write it, fill every section from the environment (`CLAUDE.md`, build scripts, CI, `docs/`). Ask the human, in one round with your best guesses, only what no file tells you: usually the off-limits data and the paid services. Then add a pointer to it in `CLAUDE.md`'s agent-skills section.
 
+Write only what holds for every spec. What belongs to one delivery (its spec, its tickets, its branches, its journal) comes from `/ship <n>`, never from this file.
+
 ```markdown
 # Delivery
 
@@ -24,14 +26,13 @@ Read by `/ship` and its subagents.
 
 ## Branches and commits
 
-- Integration branch `<naming>` from `<main>`; ticket branches `<naming>`.
-- Running `/ship` is the human's request to commit on those branches, never on `<main>`.
+- Running `/ship` is the human's request to commit on its `ship/<n>` branches, never on the default branch.
 - Commit messages: <language and style>.
 - At the end: <push, PR, who merges>.
 
 ## Docs
 
-- Specs, ADRs, glossary: <where>. Review standards: <file>.
+- ADRs, glossary: <where>. Review standards: <file>.
 
 ## Real usage
 

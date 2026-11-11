@@ -23,7 +23,7 @@ flowchart TD
     E --> T["/to-tickets<br/>tickets en sous-issues"]
     T --> SHIP
 
-    subgraph SHIP["/ship : un orchestrateur, des sous-agents"]
+    subgraph SHIP["/ship + numéro de la spec : un orchestrateur, des sous-agents"]
         direction TB
         I["Implémenteur<br/>un par ticket, dans son worktree, en TDD"]
         A{"Arbitre<br/>lit le journal et la spec"}
@@ -59,6 +59,8 @@ Le journal ne se réécrit jamais : une décision qui en remplace une autre s'aj
 
 ### `ship`
 
+Il se lance avec le numéro de l'issue de la spec : `/ship 47`. Tout le reste s'en déduit : les tickets sont les sous-issues de la 47, le journal est `decisions/47.md`, la branche d'intégration `ship/47`, les branches de tickets `ship/47-<ticket>`.
+
 L'orchestrateur ne code pas et ne lit aucun diff : il distribue le travail et route les rapports.
 
 | Rôle | Ce qu'il fait |
@@ -76,7 +78,7 @@ Fichiers du skill : `SKILL.md` (l'orchestrateur), `arbiter.md`, `reviewers.md`, 
 ## Ce qu'ils attendent d'un projet
 
 - **Une spec publiée en issue**, et ses tickets en sous-issues (`/to-spec`, `/to-tickets`).
-- **`docs/agents/delivery.md`** : les règles de livraison du projet (commande de vérification, bac à sable, données et services interdits, branches et commits). `ship` l'écrit au premier lancement à partir de `delivery-template.md`.
+- **`docs/agents/delivery.md`** : les règles de livraison du projet (commande de vérification, bac à sable, données et services interdits, style des commits). `ship` l'écrit au premier lancement à partir de `delivery-template.md`. Ce fichier ne nomme ni spec, ni ticket, ni branche : il vaut pour toutes les livraisons et ne se réécrit pas d'une spec à l'autre.
 - **Les skills `tdd`, `code-review` et `to-spec`** installés.
 
 ## Où vivent les choses
@@ -85,7 +87,8 @@ Fichiers du skill : `SKILL.md` (l'orchestrateur), `arbiter.md`, `reviewers.md`, 
 | --- | --- | --- |
 | Spec, tickets | Le suivi d'issues | Datés, fermés une fois livrés, hors du contexte des agents |
 | Journal de décisions | `~/.local/share/ship/<dépôt>/decisions/<n>.md`, `<n>` étant le numéro de l'issue de la spec | Il ne sert qu'à l'arbitre, le temps d'une livraison ; un seul exemplaire, lisible depuis tous les worktrees |
-| Registre de `ship` (état des tickets, verdicts) | Hors du dépôt et hors de `/tmp` | Pour reprendre après une compaction ou un plantage |
+| Registre de `ship` (état des tickets, verdicts) | `~/.local/share/ship/<dépôt>/ledger/<n>.md` | Pour reprendre après une compaction ou un plantage ; `/tmp` est vidé au démarrage |
+| Branches d'une livraison | `ship/<n>` et `ship/<n>-<ticket>` | Nommées par la spec, donc rien à choisir |
 | Règles de livraison, glossaire, ADR | Le dépôt | Ils décrivent le présent ou expliquent un choix durable |
 
 Aucun de ces emplacements ne se règle par projet : c'est la même convention partout.

@@ -6,6 +6,12 @@ disable-model-invocation: true
 
 You are the **orchestrator**. You dispatch subagents, read their short reports, and route. You write no code and read no diffs.
 
+`/ship <n>` delivers the spec in issue `<n>`; ask for the number if it is missing. Everything of this delivery is named after it:
+
+- its tickets are the spec's child issues;
+- its files live in `~/.local/share/ship/<repo>/` (`<repo>`: the main checkout's folder name, lowercased): the journal `decisions/<n>.md`, where `/end-grilling` wrote it, and your **ledger** `ledger/<n>.md`;
+- its branches are `ship/<n>`, the integration branch, and `ship/<n>-<ticket>`.
+
 The human already said what they want: it is in the spec, the **decision journal**, the ADRs and the tickets. Subagents cannot reach the human; every question they raise comes to you, and you send it to the **arbiter** ([arbiter.md](arbiter.md)). Only its `ESCALATE` verdicts reach the human.
 
 The delivery rules should have been provided to you (`docs/agents/delivery.md`): verify command, sandbox, off-limits data and services, branch and commit rules. If not, write them from [delivery-template.md](delivery-template.md) first.
@@ -14,9 +20,9 @@ Start every subagent with a fresh context. Brief it with **context pointers** (p
 
 ## Steps
 
-1. **Map.** Read the spec, its journal (`~/.local/share/ship/<repo>/decisions/<n>.md`, `<n>` the number of the spec's issue, where `/end-grilling` wrote it), and the tickets. The **frontier** is every open ticket with no open blocker. Keep a **ledger** outside the repo and outside `/tmp` (emptied at boot): each ticket's status, each arbiter verdict, each parked question. After a compaction, trust the ledger, git and the tracker over your summary. After a crash, start fresh agents from the ledger and the worktrees, one at a time, rather than resuming the old ones.
+1. **Map.** Read the spec, its journal and its tickets. The **frontier** is every open ticket with no open blocker. Keep the ledger: each ticket's status, each arbiter verdict, each parked question. After a compaction, trust the ledger, git and the tracker over your summary. After a crash, start fresh agents from the ledger and the worktrees, one at a time, rather than resuming the old ones.
 
-2. **Branch.** Create the integration branch from main. Nothing is ever committed on main.
+2. **Branch.** Create the integration branch from the default branch, or resume it if it exists. Nothing is ever committed on the default branch.
 
 3. **Implement.** One background **implementer** per frontier ticket, each in its own worktree. Brief:
    - base the worktree on the integration branch tip;
@@ -36,7 +42,7 @@ Start every subagent with a fresh context. Brief it with **context pointers** (p
 
 6. **Merge.** A clean ticket is committed on its branch; a **merger** merges it into the integration branch and runs verify. Close the ticket the way the tracker closes work. Recompute the frontier and go to 3.
 
-7. **Whole branch.** Once every ticket is merged or stuck, run the `code-review` skill against main; its blocking findings go through step 5.
+7. **Whole branch.** Once every ticket is merged or stuck, run the `code-review` skill against the default branch; its blocking findings go through step 5.
 
 8. **Report.** One message, in the human's language:
    - **Questions for you**: parked questions still open, with the arbiter's recommendation. A question still open at the end (a reviewer's, a ticket's) goes to an arbiter first, like any other; only `ESCALATE` reaches the human.
