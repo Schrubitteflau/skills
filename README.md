@@ -92,6 +92,8 @@ Il commence par vérifier que ta copie locale est à jour avec le dépôt distan
 
 C'est lui qui écrit `docs/agents/delivery.md` dans un dépôt neuf, à partir de `delivery-template.md`. Si ce fichier manque, `/ship` s'arrête et te renvoie ici.
 
+Fichiers du skill : `SKILL.md` (les quatre étapes), `checks.md` (les contrôles), `delivery-template.md` (le gabarit).
+
 ## Ce qu'ils attendent d'un projet
 
 - **Une spec publiée en issue**, et ses tickets en sous-issues (`/to-spec`, `/to-tickets`).

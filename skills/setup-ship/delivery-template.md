@@ -27,7 +27,7 @@ Read by `/ship` and its subagents.
 
 ## Real usage
 
-<Who calls the code and with what: typical inputs, sizes, how many at once. Reviewers block only on these.>
+<Who calls the code and with what: typical inputs, sizes, how many at once.> Reviewers block only on these.
 
 ## Project edge cases
 
