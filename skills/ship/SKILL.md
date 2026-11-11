@@ -14,7 +14,7 @@ Start every subagent with a fresh context. Brief it with **context pointers** (p
 
 ## Steps
 
-1. **Map.** Read the spec, the journal (outside the repo, at the path the delivery rules name), and the tickets. The **frontier** is every open ticket with no open blocker. Keep a **ledger** outside the repo and outside `/tmp` (emptied at boot): each ticket's status, each arbiter verdict, each parked question. After a compaction, trust the ledger, git and the tracker over your summary. After a crash, start fresh agents from the ledger and the worktrees, one at a time, rather than resuming the old ones.
+1. **Map.** Read the spec, its journal (`~/.local/share/ship/<repo>/decisions/<n>.md`, `<n>` the number of the spec's issue, where `/end-grilling` wrote it), and the tickets. The **frontier** is every open ticket with no open blocker. Keep a **ledger** outside the repo and outside `/tmp` (emptied at boot): each ticket's status, each arbiter verdict, each parked question. After a compaction, trust the ledger, git and the tracker over your summary. After a crash, start fresh agents from the ledger and the worktrees, one at a time, rather than resuming the old ones.
 
 2. **Branch.** Create the integration branch from main. Nothing is ever committed on main.
 

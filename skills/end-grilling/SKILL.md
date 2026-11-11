@@ -12,7 +12,7 @@ Run it at the end of the grilling session, after `/to-spec`.
 
 1. **Turns.** The source is this conversation. If the human points to a past session (a `.jsonl` under `~/.claude/projects/`), run [extract-turns.py](extract-turns.py) on it (`python3 -I extract-turns.py <session.jsonl> > <scratch>/turns.md`) and read that.
 
-2. **Path.** The journal lives outside the repo: one file that every worktree reads and appends to, out of git's reach. Use the path the delivery rules name (`docs/agents/delivery.md`, Docs); else `~/.local/share/ship/<repo>/decisions/<slug>.md`, where `<repo>` is the main checkout's folder name, lowercased, and `<slug>` the spec's. If the journal exists, append; never rewrite entries.
+2. **Path.** `~/.local/share/ship/<repo>/decisions/<n>.md`: one journal per spec, outside the repo, a single file that every worktree reads and appends to, out of git's reach. `<repo>` is the main checkout's folder name, lowercased (the first line of `git worktree list`); `<n>` is the number of the spec's issue. If that file exists, append; never rewrite entries.
 
 3. **Decisions.** Walk the turns in order. A decision is an answer, a "yes" to a recommendation (record what it accepted), an unprompted want, a rejection, a deferral, a correction. One entry each, grouped by topic:
 
@@ -31,4 +31,4 @@ Run it at the end of the grilling session, after `/to-spec`.
 
 4. **Gaps.** Show the human every `not in spec` entry and every contradiction with the spec, with the spec fix you'd make. Apply the ones they accept.
 
-5. **Write** the journal, headed with the spec and the session date. If `docs/agents/delivery.md` exists and names no journal path, add this one under Docs.
+5. **Write** the journal, headed with the spec and the session date.

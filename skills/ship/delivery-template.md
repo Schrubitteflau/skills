@@ -32,7 +32,6 @@ Read by `/ship` and its subagents.
 ## Docs
 
 - Specs, ADRs, glossary: <where>. Review standards: <file>.
-- Decision journal: `~/.local/share/ship/<repo>/decisions/<slug>.md` (`<repo>`: the main checkout's folder name, lowercased), outside the repo: every worktree reads and appends to that one file, and it stays out of the tree and out of git.
 
 ## Real usage
 
