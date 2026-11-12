@@ -1,149 +1,165 @@
 # skills
 
-Skills Claude Code personnels, installables avec [`npx skills`](https://github.com/vercel-labs/skills).
+Personal Claude Code skills, installable with [`npx skills`](https://github.com/vercel-labs/skills).
 
 | Skill | Description |
 | --- | --- |
-| `end-grilling` | Clôt une session de grilling : écrit chaque décision de l'humain, avec ses propres mots, dans le journal de décisions (hors du repo). |
-| `ship` | Livre les tickets d'une spec sur une branche d'intégration : chaque ticket implémenté, revu jusqu'à être propre, puis mergé. |
-| `setup-ship` | Prépare un dépôt pour les deux autres, ou vérifie qu'il l'est encore : règles de livraison à jour et vraies, arbre sans spec, journal ni skill committé. |
+| `end-grilling` | Ends a grilling session: writes every decision the human made, in their own words, to the decision journal (outside the repo). |
+| `ship` | Ships a spec's tickets on an integration branch: each ticket implemented, reviewed until clean, then merged. |
+| `setup-ship` | Prepares a repo for the other two, or checks that it still is: delivery rules up to date and true, no spec, journal or skill committed. |
 
-## Pourquoi ces deux skills
+## Why these skills
 
-Ils complètent ceux de [Matt Pocock](https://github.com/mattpocock/skills), qui couvrent déjà le grilling, la spec et les tickets. Il manquait la livraison sans surveillance : laissé seul, un agent qui implémente revient poser des questions auxquelles l'humain a déjà répondu pendant le grilling, ou qui relèvent de l'implémentation.
+They complement [Matt Pocock's](https://github.com/mattpocock/skills), which already cover grilling, the spec and the tickets. What was missing was unattended delivery: left alone, an implementing agent comes back with questions the human already answered during the grilling, or that are implementation details.
 
-- **`end-grilling`** garde ces réponses. La spec dit ce qui a été décidé ; le **journal de décisions** garde aussi comment ça a été dit, ce qui a été refusé et pourquoi, et ce qui a été repoussé hors périmètre.
-- **`ship`** livre la spec en autonomie. Quand un agent pose une question, un **arbitre** y répond à partir du journal et de la spec, à la place de l'humain. Seules les questions que rien ne tranche remontent.
+- **`end-grilling`** keeps those answers. The spec says what was decided; the **decision journal** also keeps how it was said, what was rejected and why, and what was pushed out of scope.
+- **`ship`** delivers the spec on its own. When an agent asks a question, an **arbiter** answers it from the journal and the spec, in the human's place. Only the questions nothing settles reach the human.
 
-## Le flux
+## The flow
 
 ```mermaid
 flowchart TD
-    G["/grill-with-docs<br/>tu décides"] --> S["/to-spec<br/>la spec devient une issue"]
-    S --> E["/end-grilling<br/>journal de décisions"]
-    E --> T["/to-tickets<br/>tickets en sous-issues"]
+    G["/grill-with-docs<br/>you decide"] --> S["/to-spec<br/>the spec becomes an issue"]
+    S --> E["/end-grilling<br/>decision journal"]
+    E --> T["/to-tickets<br/>tickets as sub-issues"]
     T --> SHIP
 
-    subgraph SHIP["/ship + numéro de la spec : un orchestrateur, des sous-agents"]
+    subgraph SHIP["/ship + the spec's issue number: one orchestrator, many subagents"]
         direction TB
-        I["Implémenteur<br/>un par ticket, dans son worktree, en TDD"]
-        A{"Arbitre<br/>lit le journal et la spec"}
-        R["Relecteurs<br/>régression · cas limites · spec"]
-        M["Fusion dans la branche d'intégration"]
-        I -- "une question" --> A
+        I["Implementer<br/>one per ticket, in its own worktree, with TDD"]
+        A{"Arbiter<br/>reads the journal and the spec"}
+        R["Reviewers<br/>regression · edge cases · spec"]
+        M["Merge into the integration branch"]
+        I -- "a question" --> A
         A -- "ANSWERED / DECIDED" --> I
-        I -- "terminé" --> R
-        R -- "défaut reproduit" --> I
-        R -- "propre" --> M
-        M -- "ticket suivant" --> I
+        I -- "done" --> R
+        R -- "reproduced defect" --> I
+        R -- "clean" --> M
+        M -- "next ticket" --> I
     end
 
-    A -- "ESCALATE" --> H["Toi<br/>seulement si plus rien ne peut avancer"]
+    A -- "ESCALATE" --> H["You<br/>only when nothing else can move"]
     H --> A
-    SHIP --> RV["/code-review de toute la branche"]
-    RV --> RP["Rapport : à vérifier dans l'app, décidé sans toi, non résolu"]
+    SHIP --> RV["/code-review of the whole branch"]
+    RV --> RP["Report: check in the app, decided without you, unresolved"]
 ```
 
-`/grill-with-docs`, `/to-spec`, `/to-tickets`, `/tdd` et `/code-review` sont les skills de Matt Pocock ; `/end-grilling` et `/ship` sont ceux de ce dépôt. `/setup-ship` n'est pas dans le flux : il prépare le dépôt, une fois.
+`/grill-with-docs`, `/to-spec`, `/to-tickets`, `/tdd` and `/code-review` are Matt Pocock's skills; `/end-grilling` and `/ship` are this repo's. `/setup-ship` is not part of the flow: it prepares the repo, once.
 
-## Comment ils marchent
+## How they work
 
 ### `end-grilling`
 
-À lancer à la fin du grilling, après `/to-spec`.
+Run it at the end of the grilling, after `/to-spec`.
 
-1. Il relit la conversation (ou une session passée, extraite par `extract-turns.py`).
-2. Il écrit une entrée par décision : ce qui était demandé, la réponse mot pour mot, ce à quoi elle engage, la section de la spec concernée.
-3. Il montre les décisions absentes de la spec et les contradictions, et corrige la spec si tu acceptes.
+1. It rereads the conversation (or a past session, extracted by `extract-turns.py`).
+2. It writes one entry per decision: what was asked, the answer verbatim, what it commits the feature to, the spec section it belongs to.
+3. It shows the decisions missing from the spec and the contradictions, and fixes the spec if you accept.
 
-Le journal ne se réécrit jamais : une décision qui en remplace une autre s'ajoute, et l'ancienne est marquée comme remplacée.
+The journal is never rewritten: a decision that overrides another is appended, and the earlier one is marked as superseded.
 
 ### `ship`
 
-Il se lance avec le numéro de l'issue de la spec : `/ship 47`. Tout le reste s'en déduit : les tickets sont les sous-issues de la 47, le journal est `decisions/47.md`, la branche d'intégration `ship/47`, les branches de tickets `ship/47-<ticket>`.
+Run it with the spec's issue number: `/ship 47`. Everything else follows from it: the tickets are the sub-issues of #47, the journal is `decisions/47.md`, the integration branch is `ship/47`, the ticket branches are `ship/47-<ticket>`.
 
-L'orchestrateur ne code pas et ne lit aucun diff : il distribue le travail et route les rapports.
+The orchestrator writes no code and reads no diff: it hands out work and routes reports.
 
-| Rôle | Ce qu'il fait |
+| Role | What it does |
 | --- | --- |
-| Implémenteur | Un par ticket, dans son propre worktree, avec `/tdd`. Il tranche seul les choix d'implémentation et les liste. |
-| Arbitre | Répond aux questions comme l'humain l'a déjà fait. Il ne fait remonter une question que si elle se pose sans parler de code, si la réponse se remarquerait, et si rien de ce qui a été dit ne la tranche. |
-| Relecteurs | Trois par ticket, un par angle : régression, cas limites, conformité à la spec. Un défaut ne bloque que s'il a été reproduit. Trois tours au plus. |
-| Fusionneur | Fusionne le ticket propre dans la branche d'intégration et relance la vérification. |
-| Vérificateur | Charge dans un vrai navigateur ce qui a changé à l'écran, dans le bac à sable. |
+| Implementer | One per ticket, in its own worktree, with `/tdd`. It makes implementation choices on its own and lists them. |
+| Arbiter | Answers questions the way the human already did. It escalates a question only if it can be asked without mentioning code, if the answer would be noticeable, and if nothing already said settles it. |
+| Reviewers | Three per ticket, one per lens: regression, edge cases, spec compliance. A defect blocks only once reproduced. Three rounds at most. |
+| Merger | Merges the clean ticket into the integration branch and reruns verification. |
+| Checker | Loads whatever changed on screen in a real browser, in the sandbox. |
 
-Rien n'est jamais committé sur la branche principale. À la fin, un seul message : les questions restées ouvertes, ce qu'il faut regarder de tes yeux, ce qui a été décidé sans toi, ce qui n'est pas résolu.
+Nothing is ever committed on the main branch. At the end, a single message: the questions still open, what you need to check with your own eyes, what was decided without you, what is unresolved.
 
-Fichiers du skill : `SKILL.md` (l'orchestrateur), `arbiter.md`, `reviewers.md`.
+Skill files: `SKILL.md` (the orchestrator), `arbiter.md`, `reviewers.md`.
 
 ### `setup-ship`
 
-À lancer une fois par dépôt avant le premier `/ship`, puis après une mise à jour des skills ou un changement d'outillage du projet. Il suit la démarche de `/setup-matt-pocock-skills` : explorer, contrôler, montrer, confirmer, écrire.
+Run it once per repo before the first `/ship`, then after a skills update or a change in the project's tooling. It follows the approach of `/setup-matt-pocock-skills`: explore, check, show, confirm, write.
 
-| Contrôle | Ce qu'il attrape |
+| Check | What it catches |
 | --- | --- |
-| Forme | Une section du gabarit qui manque, un reste d'un ancien gabarit (chemin de journal, nommage de branches, emplacement des specs) |
-| Durable | Une ligne propre à une seule livraison : un numéro de spec, un nom de branche |
-| Vrai | Un chemin qui n'existe plus, une commande absente des scripts du projet et de la machine, un fichier cité qui a disparu |
-| Arbre propre | Une spec, un journal ou un skill tiers committé |
-| Pointeur | L'entrée « Delivery » manquante dans `CLAUDE.md` ou `AGENTS.md` |
+| Shape | A template section that is missing, a leftover from an older template (journal path, branch naming, where specs live) |
+| Standing | A line specific to a single delivery: a spec number, a branch name |
+| True | A path that no longer exists, a command missing from the project's scripts and from the machine, a cited file that is gone |
+| Clean tree | A committed spec, journal or third-party skill |
+| Pointer | The missing "Delivery" entry in `CLAUDE.md` or `AGENTS.md` |
 
-Il commence par vérifier que ta copie locale est à jour avec le dépôt distant, pour ne pas corriger un fichier déjà corrigé ailleurs. Il contrôle qu'une commande existe, sans la lancer : une vérification complète peut prendre plusieurs minutes. Il montre ses constats et ses corrections, puis n'écrit qu'après ton accord, et ne committe rien.
+It first checks that your local copy is up to date with the remote, so it doesn't fix a file already fixed elsewhere. It checks that a command exists without running it: a full verification can take several minutes. It shows its findings and fixes, writes only after you agree, and commits nothing.
 
-C'est lui qui écrit `docs/agents/delivery.md` dans un dépôt neuf, à partir de `delivery-template.md`. Si ce fichier manque, `/ship` s'arrête et te renvoie ici.
+It is the one that writes `docs/agents/delivery.md` in a new repo, from `delivery-template.md`. If that file is missing, `/ship` stops and sends you here.
 
-Fichiers du skill : `SKILL.md` (les quatre étapes), `checks.md` (les contrôles), `delivery-template.md` (le gabarit).
+Skill files: `SKILL.md` (the four steps), `checks.md` (the checks), `delivery-template.md` (the template).
 
-## Ce qu'ils attendent d'un projet
+## What they expect from a project
 
-- **Une spec publiée en issue**, et ses tickets en sous-issues (`/to-spec`, `/to-tickets`).
-- **`docs/agents/delivery.md`** : les règles de livraison du projet (commande de vérification, bac à sable, données et services interdits, style des commits). `/setup-ship` l'écrit et le tient à jour. Ce fichier ne nomme ni spec, ni ticket, ni branche : il vaut pour toutes les livraisons et ne se réécrit pas d'une spec à l'autre.
-- **Les skills `tdd`, `code-review` et `to-spec`** installés.
+- **A spec published as an issue**, and its tickets as sub-issues (`/to-spec`, `/to-tickets`).
+- **`docs/agents/delivery.md`**: the project's delivery rules (verify command, sandbox, off-limits data and services, commit style). `/setup-ship` writes it and keeps it up to date. This file names no spec, ticket or branch: it holds for every delivery and is not rewritten from one spec to the next.
+- **Matt Pocock's skills, all of them, at the version listed under [Compatibility](#compatibility)**, and `/setup-matt-pocock-skills` run once in the repo.
 
-## Où vivent les choses
+## Where things live
 
-| Quoi | Où | Pourquoi |
+| What | Where | Why |
 | --- | --- | --- |
-| Spec, tickets | Le suivi d'issues | Datés, fermés une fois livrés, hors du contexte des agents |
-| Journal de décisions | `~/.local/share/ship/<dépôt>/decisions/<n>.md`, `<n>` étant le numéro de l'issue de la spec | Il ne sert qu'à l'arbitre, le temps d'une livraison ; un seul exemplaire, lisible depuis tous les worktrees |
-| Registre de `ship` (état des tickets, verdicts) | `~/.local/share/ship/<dépôt>/ledger/<n>.md` | Pour reprendre après une compaction ou un plantage ; `/tmp` est vidé au démarrage |
-| Branches d'une livraison | `ship/<n>` et `ship/<n>-<ticket>` | Nommées par la spec, donc rien à choisir |
-| Règles de livraison, glossaire, ADR | Le dépôt | Ils décrivent le présent ou expliquent un choix durable |
+| Spec, tickets | The issue tracker | Dated, closed once delivered, out of the agents' context |
+| Decision journal | `~/.local/share/ship/<repo>/decisions/<n>.md`, `<n>` being the spec's issue number | Only `ship` reads it, for one delivery; a single copy, readable from every worktree |
+| `ship` ledger (ticket status, verdicts) | `~/.local/share/ship/<repo>/ledger/<n>.md` | To resume after a compaction or a crash; `/tmp` is emptied at boot |
+| A delivery's branches | `ship/<n>` and `ship/<n>-<ticket>` | Named after the spec, so nothing to choose |
+| Delivery rules, glossary, ADRs | The repo | They describe the present or explain a lasting choice |
 
-Aucun de ces emplacements ne se règle par projet : c'est la même convention partout.
+None of these locations is configured per project: the same convention applies everywhere.
 
-## Quand ne pas les utiliser
+## When not to use them
 
-- **Un petit changement, un seul ticket.** `ship` lance un implémenteur et jusqu'à trois relecteurs par ticket : c'est bien plus cher que le changement lui-même. Fais-le directement, ou avec `/implement`.
-- **Pas de grilling, donc pas de journal.** L'arbitre n'aurait rien pour répondre à ta place : il déciderait à l'aveugle ou te ferait tout remonter.
-- **Un besoin encore flou.** `ship` exécute une spec, il ne cherche pas le chemin. Pour explorer : `/prototype` ou `/wayfinder`.
-- **Ce qui se juge à l'œil** : l'allure d'une page, un vrai téléphone, de vraies données. `ship` le range dans « à vérifier dans l'app », il ne le valide pas.
-- **Un projet sans commande de vérification ni bac à sable.** Les relecteurs ne bloquent que sur un défaut reproduit ; sans moyen de lancer le produit en sécurité, ils ne reproduisent rien.
-- **Si tu veux relire chaque diff au fil de l'eau.** Le principe est inverse : tu relis la branche d'intégration à la fin.
-- **À plusieurs, ou depuis une session cloud.** Le journal et le registre sont sur ta machine : un collègue ou une session distante ne les a pas.
+- **A small change, a single ticket.** `ship` starts one implementer and up to three reviewers per ticket: far more expensive than the change itself. Do it directly, or with `/implement`.
+- **No grilling, so no journal.** The arbiter would have nothing to answer in your place: it would decide blindly or escalate everything.
+- **A need that is still fuzzy.** `ship` executes a spec, it doesn't search for the path. To explore: `/prototype` or `/wayfinder`.
+- **What can only be judged by eye**: how a page looks, a real phone, real data. `ship` files it under "check in the app", it doesn't validate it.
+- **A project with no verify command and no sandbox.** Reviewers block only on a reproduced defect; with no way to run the product safely, they reproduce nothing.
+- **If you want to review each diff as it lands.** The principle is the opposite: you review the integration branch at the end.
+- **As a team, or from a cloud session.** The journal and the ledger live on your machine: a colleague or a remote session doesn't have them.
+
+## Compatibility
+
+These skills call Matt Pocock's, which evolve too. Rather than tracking which of his skills each one needs, each release is tested against one version of his whole set:
+
+| This repo | Matt Pocock's skills |
+| --- | --- |
+| v1.0.0 | [v1.3.2](https://github.com/mattpocock/skills/releases/tag/v1.3.2) |
+
+Install his main skills at that version:
+
+```bash
+npx skills add https://github.com/mattpocock/skills/tree/v1.3.2 -g
+```
+
+When asked which skills to install, select the **Mattpocock Skills** group; the **Other** group is not needed.
+
+A newer version of his will probably work, but it is not tested.
 
 ## Installation
 
-Le repo est privé : `npx skills` le clone via git, donc il faut être authentifié auprès de GitHub (`gh auth login` / `gh auth setup-git`).
-
 ```bash
-# Tous les skills, au niveau utilisateur
+# All skills, user-level
 npx skills add Schrubitteflau/skills -g
 
-# Un seul skill
+# A single skill
 npx skills add Schrubitteflau/skills -g --skill ship
 ```
 
-Mise à jour :
+Update:
 
 ```bash
 npx skills update -g
 ```
 
-## Modifier un skill
+## Editing a skill
 
-Ce dépôt est la source de vérité. Modifier ici, pousser, puis lancer `npx skills update -g`. Ne rien éditer dans `~/.claude/skills/` ni `~/.agents/skills/` : la prochaine mise à jour l'écraserait.
+This repo is the source of truth. Edit here, push, then run `npx skills update -g`. Don't edit anything in `~/.claude/skills/` or `~/.agents/skills/`: the next update would overwrite it.
 
-## Ajouter un skill
+## Adding a skill
 
-Créer `skills/<nom>/SKILL.md` (frontmatter `name` + `description`) avec ses fichiers annexes à côté.
+Create `skills/<name>/SKILL.md` (frontmatter `name` + `description`) with its supporting files next to it.
