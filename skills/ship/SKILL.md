@@ -52,3 +52,7 @@ Start every subagent with a fresh context. Brief it with **context pointers** (p
    - **Branch**: name, commits, what happens next per the delivery rules.
 
    Then remove your worktrees.
+
+## Pause
+
+When the human asks to pause, **drain**: start no new ticket; drive every started ticket through review and merge. Mark the ledger `draining`. Once nothing is in flight, release what you hold (locks, sandboxes), replace the mark with the resume point, and say so in one line.
