@@ -21,4 +21,4 @@ You also run the **red check**: each test the diff adds or changes must fail on 
 
 ## Report
 
-Per finding: `id`, `lens`, `blocking | plausible`, the scenario in a sentence, the repro (command and output), the test that should exist. Then any questions, with their options.
+Write to `findings/<spec>-<ticket>-r<round>-<lens>.md` in the delivery folder your brief names, per finding: `id`, `lens`, `blocking | plausible`, the scenario in a sentence, the repro (command and output), the test that should exist. Then any questions, with their options. Your report names that file, then gives one line per finding (`id`, `blocking | plausible`) and per question.
