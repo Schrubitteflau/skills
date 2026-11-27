@@ -7,6 +7,7 @@ Personal Claude Code skills, installable with [`npx skills`](https://github.com/
 | `end-grilling` | Ends a grilling session: writes every decision the human made, in their own words, to the decision journal (outside the repo). |
 | `ship` | Ships a spec's tickets on an integration branch: each ticket implemented, reviewed until clean, then merged. |
 | `setup-ship` | Prepares a repo for the other two, or checks that it still is: delivery rules up to date and true, no spec, journal or skill committed. |
+| `ask-ship` | Tells you where a delivery stands in the flow and which skill comes next. |
 
 ## Why these skills
 
@@ -44,7 +45,7 @@ flowchart TD
     RV --> RP["Report: check in the app, decided without you, unresolved"]
 ```
 
-`/grill-with-docs`, `/to-spec`, `/to-tickets`, `/tdd` and `/code-review` are Matt Pocock's skills; `/end-grilling` and `/ship` are this repo's. `/setup-ship` is not part of the flow: it prepares the repo, once.
+`/grill-with-docs`, `/to-spec`, `/to-tickets`, `/tdd` and `/code-review` are Matt Pocock's skills; `/end-grilling` and `/ship` are this repo's. `/setup-ship` is not part of the flow: it prepares the repo, once. No agent moves you along the flow: you run each step, and `/ask-ship` tells you where you stand when you lose track.
 
 ## How they work
 
@@ -93,6 +94,12 @@ It first checks that your local copy is up to date with the remote, so it doesn'
 It is the one that writes `docs/agents/delivery.md` in a new repo, from `delivery-template.md`. If that file is missing, `/ship` stops and sends you here.
 
 Skill files: `SKILL.md` (the four steps), `checks.md` (the checks), `delivery-template.md` (the template).
+
+### `ask-ship`
+
+Run it any time, with or without the spec's issue number. It checks each step's result on disk and in the tracker (journal, sub-issues, `ship/<n>` branch, ledger), names the first step not done and the command to run, and runs nothing. Outside what `/ship` is for, it sends you to `/ask-matt`.
+
+Skill file: `SKILL.md`, which holds the flow as a table of steps and their done-when.
 
 ## What they expect from a project
 
