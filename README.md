@@ -97,9 +97,9 @@ Skill files: `SKILL.md` (the four steps), `checks.md` (the checks), `delivery-te
 
 ### `ask-ship`
 
-Run it any time, with or without the spec's issue number. It checks each step's result on disk and in the tracker (journal, sub-issues, `ship/<n>` branch, ledger), names the first step not done and the command to run, and runs nothing. Outside what `/ship` is for, it sends you to `/ask-matt`.
+Run it any time, with or without the spec's issue number. It checks the artifact each step leaves (delivery rules, spec, journal, sub-issues, integration branch), names the first one missing and the command that writes it, and runs nothing. Outside what `/ship` is for, it sends you to `/ask-matt`.
 
-Skill file: `SKILL.md`, which holds the flow as a table of steps and their done-when.
+Skill file: `SKILL.md`, which holds the flow as a table of steps and the artifact each leaves.
 
 ## What they expect from a project
 
