@@ -5,6 +5,7 @@ Personal Claude Code skills, installable with [`npx skills`](https://github.com/
 | Skill | Description |
 | --- | --- |
 | `end-grilling` | Ends a grilling session: writes every decision the human made, in their own words, to the decision journal (outside the repo). |
+| `challenge-tickets` | Challenges a `/to-tickets` draft with three reviewers on different models, down to the fewest tickets that still ship the spec. |
 | `ship` | Ships a spec's tickets on an integration branch: each ticket implemented, reviewed until clean, then merged. |
 | `setup-ship` | Prepares a repo for the other two, or checks that it still is: delivery rules up to date and true, no spec, journal or skill committed. |
 | `ask-ship` | Tells you where a delivery stands in the flow and which skill comes next. |
@@ -23,6 +24,8 @@ flowchart TD
     G["/grill-with-docs<br/>you decide"] --> S["/to-spec<br/>the spec becomes an issue"]
     S --> E["/end-grilling<br/>decision journal"]
     E --> T["/to-tickets<br/>tickets as sub-issues"]
+    T --> C["/challenge-tickets<br/>fewest tickets"]
+    C --> T
     T --> SHIP
 
     subgraph SHIP["/ship + the spec's issue number: one orchestrator, many subagents"]
@@ -58,6 +61,14 @@ Run it at the end of the grilling, after `/to-spec`.
 3. It shows the decisions missing from the spec and the contradictions, and fixes the spec if you accept.
 
 The journal is never rewritten: a decision that overrides another is appended, and the earlier one is marked as superseded.
+
+### `challenge-tickets`
+
+Run it while `/to-tickets` quizzes you on its draft, before you approve it; what you type after the command (a ticket cap, what must be usable first) reaches every reviewer verbatim.
+
+It reads its slicing rules from `/to-tickets` itself, so it follows them as they evolve, and measures their size bound against the agent that will implement, a frontier coding agent. That reading matters because each ticket costs a full `/ship` cycle (an implementer, three reviewers, a merger, merge conflicts with its neighbours), and reviewers that size slices for a weaker agent keep splitting them: one spec went from 22 tickets to 44. Three reviewers run, each on its own model (on Claude Code: Fable, Opus, Sonnet): one proposes its own breakdown without seeing the draft, one checks coverage and blocking edges, one checks what would stall an unattended `/ship`. The synthesis starts from the smallest credible proposal, every ticket above it names what it buys, and the result goes back to `/to-tickets`'s quiz and publish.
+
+Skill file: `SKILL.md`.
 
 ### `ship`
 
